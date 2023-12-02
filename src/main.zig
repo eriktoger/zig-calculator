@@ -54,6 +54,11 @@ fn handle_plus(input: [input_length]u8, target_index: u64) i64 {
 
 fn handle_minus(input: [input_length]u8, target_index: u64) i64 {
     var splitInput = split_on_operation(input, target_index);
+
+    var is_negative_number = target_index == 0;
+    if (is_negative_number) {
+        return -calculate(splitInput.suffix);
+    }
     return calculate(splitInput.prefix) - calculate(splitInput.suffix);
 }
 
@@ -142,5 +147,40 @@ test "434 - 354 = 80" {
     input[7] = 10;
     var result = calculate(input);
     var expected: i64 = 80;
+    try std.testing.expectEqual(expected, result);
+}
+
+test "-10 = -10" {
+    var input: [input_length]u8 = undefined;
+    input[0] = minus;
+    input[1] = 49;
+    input[2] = 48;
+    input[3] = 10;
+    var result = calculate(input);
+    var expected: i64 = -10;
+    try std.testing.expectEqual(expected, result);
+}
+
+test "-1 + 1 = 0" {
+    var input: [input_length]u8 = undefined;
+    input[0] = minus;
+    input[1] = 49;
+    input[2] = plus;
+    input[3] = 49;
+    input[4] = 10;
+    var result = calculate(input);
+    var expected: i64 = 0;
+    try std.testing.expectEqual(expected, result);
+}
+
+test "1--1 = 2" {
+    var input: [input_length]u8 = undefined;
+    input[0] = 49;
+    input[1] = minus;
+    input[2] = minus;
+    input[3] = 49;
+    input[4] = 10;
+    var result = calculate(input);
+    var expected: i64 = 2;
     try std.testing.expectEqual(expected, result);
 }
