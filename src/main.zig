@@ -4,6 +4,7 @@ const input_length = 100;
 const multiplication = 42;
 const plus = 43;
 const minus = 45;
+const division = 47;
 
 fn get_input() ![input_length]u8 {
     const in = std.io.getStdIn();
@@ -48,6 +49,11 @@ fn split_on_operation(input: [input_length]u8, target_index: u64) SplitInput {
     return SplitInput{ .prefix = prefix, .suffix = suffix };
 }
 
+fn handle_division(input: [input_length]u8, target_index: u64) i64 {
+    var splitInput = split_on_operation(input, target_index);
+    return @divExact(calculate(splitInput.prefix), calculate(splitInput.suffix));
+}
+
 fn handle_multiplication(input: [input_length]u8, target_index: u64) i64 {
     var splitInput = split_on_operation(input, target_index);
     return calculate(splitInput.prefix) * calculate(splitInput.suffix);
@@ -69,6 +75,9 @@ fn handle_minus(input: [input_length]u8, target_index: u64) i64 {
 }
 
 fn calculate(input: [input_length]u8) i64 {
+    if (find_index(input, division)) |target_index| {
+        return handle_division(input, target_index);
+    } else |_| {}
     if (find_index(input, multiplication)) |target_index| {
         return handle_multiplication(input, target_index);
     } else |_| {}
@@ -215,5 +224,16 @@ test "2 * -3 = 6" {
     input[4] = 10;
     var result = calculate(input);
     var expected: i64 = -6;
+    try std.testing.expectEqual(expected, result);
+}
+
+test "6 / 3 = 2" {
+    var input: [input_length]u8 = undefined;
+    input[0] = 54;
+    input[1] = division;
+    input[2] = 51;
+    input[3] = 10;
+    var result = calculate(input);
+    var expected: i64 = 2;
     try std.testing.expectEqual(expected, result);
 }
